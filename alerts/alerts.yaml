@@ -1,0 +1,55 @@
+groups:
+  - name: monitoring-platform-alerts
+
+    rules:
+
+    - alert: ApplicationDown
+      expr: up{job="monitoring-app"} == 0
+      for: 1m
+
+      labels:
+        severity: critical
+
+      annotations:
+        summary: "Monitoring Application is Down"
+        description: "The monitoring application has been unreachable for more than 1 minute."
+
+    - alert: HighLatency
+      expr: (
+        rate(http_request_duration_seconds_sum[5m])
+        /
+        rate(http_request_duration_seconds_count[5m])
+      ) > 1
+
+      for: 2m
+
+      labels:
+        severity: warning
+
+      annotations:
+        summary: "High Response Time"
+        description: "Average response time is greater than 1 second."
+
+    - alert: NoTraffic
+      expr: rate(http_requests_total[5m]) == 0
+
+      for: 5m
+
+      labels:
+        severity: warning
+
+      annotations:
+        summary: "No Incoming Requests"
+        description: "No requests have been received in the last 5 minutes."
+
+    - alert: PrometheusDown
+      expr: up{job="prometheus"} == 0
+
+      for: 1m
+
+      labels:
+        severity: critical
+
+      annotations:
+        summary: "Prometheus Down"
+        description: "Prometheus is unreachable."
